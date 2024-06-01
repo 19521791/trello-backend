@@ -3,13 +3,15 @@ import { slugify } from '../utils/formatters.js'
 import { boardModel } from '../models/board.model.js'
 import ApiError from '../utils/apiError.js'
 import { StatusCodes } from 'http-status-codes'
+import pkg from 'lodash'
+
+const { cloneDeep } = pkg
 
 const createNew = async (reqBody) => {
   try {
     const newBoard = {
       ...reqBody,
-      slug: slugify(reqBody.title),
-      title: ''
+      slug: slugify(reqBody.title)
     }
 
     const createdBoard = await boardModel.createNew(newBoard)
@@ -27,6 +29,14 @@ const getDetails = async (boardId) => {
     if (!board) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
     }
+
+    const resBoard = cloneDeep(board)
+
+    resBoard.columns.forEach(column => {
+      column.cards = resBoard.cards.filter(card => card.columnId.equals(column._id))
+    })
+
+    delete resBoard.cards
 
     return board
   } catch (error) { throw error }
