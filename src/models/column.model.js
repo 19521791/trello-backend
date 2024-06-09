@@ -57,11 +57,21 @@ const update = async (columnId, updateData) => {
       }
     })
 
+    if (updateData.cardOrderIds) {
+      updateData.cardOrderIds = updateData.cardOrderIds.map(_id => (new ObjectId(_id)))
+    }
+
     return await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(columnId) },
       { $set: updateData },
       { returnDocument: 'after' }
     )
+  } catch (error) { throw new Error(error) }
+}
+
+const deleteOneById = async (columnId) => {
+  try {
+    return await GET_DB().collection(COLUMN_COLLECTION_NAME).deleteOne({ _id: new ObjectId(columnId) })
   } catch (error) { throw new Error(error) }
 }
 
@@ -71,5 +81,6 @@ export const columnModel = {
   createNew,
   findOneById,
   pushCardOrderIds,
-  update
+  update,
+  deleteOneById
 }
